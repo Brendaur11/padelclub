@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel Club · Turnos (v4)</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f0e8; --panel:#fff; --panel2:#f8f6f1; --sunk:#f8f6f1; --line:#e2ddd1; --line2:#ece8de; --card:#fff;
+    --text:#13203a; --muted:#6c7488; --soft:#3b4660; --ink:#13203a;
+    --acc:#1d4ed8; --acc-d:#1a3fb0; --on-acc:#fff; --lime:#d6f03c; --lime-ink:#2c3a00;
+    --green:#15803d; --red:#b91c1c; --blue:#0369a1; --amber:#c2410c; --violet:#7c3aed;
+    --radius:12px; --cond:Archivo,"Arial Narrow",sans-serif;
+    --sh:0 1px 2px rgba(19,32,58,.06),0 4px 14px rgba(19,32,58,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Archivo,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+  button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+  button:disabled{cursor:not-allowed}
+  .ico{flex-shrink:0;vertical-align:-3px}
+
+  /* ===== Sidebar ===== */
+  aside{width:236px;background:var(--panel);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;position:sticky;top:0;height:100vh}
+  .aside-top{display:contents}
+  .menu{display:flex;flex-direction:column;gap:4px;flex:1}
+  .burger{display:none;width:44px;height:44px;border-radius:10px;place-items:center;color:#fff;background:rgba(255,255,255,.08)}
+  .burger:hover{background:rgba(255,255,255,.16)}
+  .brand{display:flex;align-items:center;gap:12px;margin:0 6px 22px;font-family:var(--cond);font-stretch:80%}
+  .brand .logo{width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--acc) 14%,#fff);display:grid;place-items:center;color:var(--acc);flex-shrink:0}
+  .brand b{display:block;font-size:25px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;line-height:1}
+  .brand small{display:block;font-family:Archivo,system-ui,sans-serif;font-size:13px;color:var(--muted);margin-top:3px}
+  .nav-sep{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:14px 16px 4px}
+  .nav{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;color:var(--text);font-size:16px;font-weight:500;text-align:left;width:100%}
+  .nav .ico{width:21px;height:21px}
+  .nav:hover{background:var(--panel2)}
+  .nav.active{background:var(--acc);color:var(--on-acc);font-weight:700;box-shadow:0 6px 18px rgba(29,78,216,.2)}
+  .nav .badge{margin-left:auto;background:var(--amber);color:#fff;min-width:24px;height:24px;border-radius:99px;display:grid;place-items:center;padding:0 6px;font-size:12px;font-weight:700}
+  .nav.active .badge{background:var(--on-acc);color:var(--acc)}
+  .user{margin-top:auto;display:flex;align-items:center;gap:12px;padding:16px 6px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .user .av{width:42px;height:42px;border-radius:50%;background:#1c2a3f;display:grid;place-items:center;font-weight:700;color:var(--text)}
+  .user b{display:block;color:var(--text);font-size:15px}
+
+  /* ===== Main ===== */
+  main{flex:1;padding:18px 28px 28px;min-width:0}
+  .view{display:none}.view.active{display:block}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  h1{font-size:40px;font-weight:600;letter-spacing:.3px;line-height:1.1}
+  .sub{color:var(--muted);font-size:14px;margin-top:2px}
+  .title-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .when{display:flex;align-items:center;gap:8px;color:var(--soft);font-size:16px;padding-left:22px;border-left:2px solid var(--acc)}
+  .when .ico{color:var(--acc)}
+  .kpis{display:flex;gap:14px;flex-wrap:wrap}
+  .kpi{--k:var(--blue);display:flex;align-items:center;gap:14px;min-width:170px;padding:10px 18px;border-radius:12px;background:color-mix(in srgb,var(--k) 9%,var(--card));border:1px solid color-mix(in srgb,var(--k) 25%,var(--line));color:var(--soft);font-size:13px}
+  .kpi .ico{color:var(--k)}
+  .kpi b{display:block;font-family:var(--cond);font-stretch:80%;font-size:24px;font-weight:600;color:var(--text);line-height:1.1}
+  .kpi.g{--k:var(--green)}.kpi.l{--k:var(--acc)}.kpi.a{--k:var(--amber)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:700;font-size:15px;white-space:nowrap}
+  .btn.primary{background:var(--acc);color:var(--on-acc)}.btn.primary:hover{background:var(--acc-d)}
+  .btn.primary:disabled{opacity:.4}
+  .btn.ghost{background:var(--panel2);border:1px solid var(--line)}.btn.ghost:hover{border-color:var(--acc)}
+  .btn.warn{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red);border:1px solid color-mix(in srgb,var(--red) 40%,transparent)}
+  .btn.sm{padding:8px 12px;font-size:14px}
+  .btn.icon{padding:8px 10px}
+  select,.inp{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:15px}
+  select:focus,.inp:focus{outline:none;border-color:var(--acc)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{padding:8px 16px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:500}
+  .tab.active{background:var(--acc);color:var(--on-acc);border-color:var(--acc);font-weight:700}
+  .seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{padding:7px 12px;border-radius:7px;font-size:14px;font-weight:600;color:var(--muted)}
+  .seg button.on{background:var(--acc);color:var(--on-acc)}
+  .pill{--c:var(--green);display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);white-space:nowrap}
+  .pill.senada{--c:var(--blue)}.pill.pendiente{--c:var(--amber)}.pill.cancelada{--c:var(--red)}
+  .vacio{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
+
+  /* ===== Agenda ===== */
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .datenav{display:flex;align-items:center;gap:6px}
+  .datenav button{width:40px;height:40px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center}
+  .datenav button.hoy{width:auto;padding:0 14px;font-weight:600}
+  .datenav button:hover{border-color:var(--acc)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--soft);margin-left:auto;margin-right:6px}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .ag-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--sunk);max-height:calc(100vh - 230px);min-height:320px}
+  .ag{display:grid;position:relative}
+  .ag-corner,.ag-hd{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+  .ag-corner{left:0;z-index:6;grid-row:1;grid-column:1}
+  .ag-hd{grid-row:1;padding:8px 12px;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;min-width:0}
+  .ag-hd b{font-family:var(--cond);font-stretch:80%;font-size:19px;font-weight:600;white-space:nowrap}
+  .ag-hd small{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ag-hd.mantenimiento b{color:var(--muted)}
+  .ag-t{grid-column:1;position:sticky;left:0;z-index:4;background:var(--sunk);font-size:12px;color:var(--muted);text-align:right;padding:0 10px 0 0;font-variant-numeric:tabular-nums}
+  .ag-t span{position:relative;top:-8px}
+  .ag-c{border-top:1px solid var(--line2);border-left:1px solid var(--line);position:relative}
+  .ag-c.hr{border-top-color:var(--line)}
+  .ag-c:not(:disabled):hover{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+  .ag-c:not(:disabled):hover::after{content:"+ Reservar";position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--acc)}
+  .ag-c.past{background:repeating-linear-gradient(135deg,transparent 0 6px,rgba(19,32,58,.035) 6px 12px)}
+  .ag-b{--c:var(--green);z-index:2;margin:2px 5px;border-radius:8px;padding:5px 9px;text-align:left;overflow:hidden;display:flex;flex-direction:column;gap:1px;min-width:0;
+    background:color-mix(in srgb,var(--c) 18%,var(--card));border:1px solid color-mix(in srgb,var(--c) 40%,transparent);border-left:4px solid var(--c);font-size:13px;transition:.12s}
+  .ag-b:hover{background:color-mix(in srgb,var(--c) 28%,var(--card))}
+  .ag-b.senada{--c:var(--blue)}.ag-b.pendiente{--c:var(--amber)}
+  .ag-b b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+  .ag-b b .ico{color:var(--violet)}
+  .ag-b small{font-size:11px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ag-b small .ico{vertical-align:-2px}
+  .ag-mant{z-index:2;margin:2px 5px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--muted);font-size:13px;padding:12px;
+    background:repeating-linear-gradient(45deg,#f6efe2 0 10px,#efe6d4 10px 20px);border:1px dashed #e0d3b8;color:#7a5a2a}
+  .ag-mant b{color:#7a5a2a}
+  .ag-now{z-index:3;height:2px;background:var(--red);position:relative;pointer-events:none;align-self:start}
+  .ag-now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--red)}
+
+  /* ===== Reservas ===== */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .search-wrap{position:relative;flex:1;min-width:240px}
+  .search-wrap .ico{position:absolute;left:12px;top:12px;color:var(--muted)}
+  .search-wrap .inp{width:100%;padding-left:40px}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--sunk)}
+  .tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:860px}
+  .tbl th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0}
+  .tbl td{padding:10px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .tbl td small{display:block;color:var(--muted);font-size:12px}
+  .tbl tbody tr{cursor:pointer}
+  .tbl tbody tr:hover{background:var(--sunk)}
+  .tbl tr.cancelada td{opacity:.55}
+  .tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+  .org{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--soft)}
+  .org .ico{color:var(--muted)}
+  .tbl-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px;padding:12px 4px}
+  .tbl-foot b{color:var(--text)}
+
+  /* ===== Canchas ===== */
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .court{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .court-vis{padding:14px 14px 0;position:relative}
+  .court-vis svg{display:block;width:100%;height:auto;border-radius:8px}
+  .court.mantenimiento .court-vis svg{filter:grayscale(.85) brightness(.6)}
+  .court-vis .stp{position:absolute;right:24px;top:24px}
+  .court-bd{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .court-hd b{font-family:var(--cond);font-stretch:80%;font-size:23px;font-weight:600;display:block;line-height:1.1}
+  .court-hd small{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:5px}
+  .stp{--c:var(--green);display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;color:var(--c);background:color-mix(in srgb,#fff 82%,var(--c));white-space:nowrap}
+  .stp::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+  .stp.mantenimiento{--c:var(--amber)}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tags span{display:inline-flex;align-items:center;gap:5px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:3px 10px;font-size:12px}
+  .tags .ico{color:var(--acc)}
+  .kv3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .kv3 div{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+  .kv3 small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kv3 b{font-family:var(--cond);font-stretch:80%;font-size:19px;font-weight:600}
+  .nota{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--amber);background:color-mix(in srgb,var(--amber) 10%,transparent);border-radius:8px;padding:8px 10px}
+  .nota .ico{margin-top:1px}
+  .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+  .acts .danger{margin-left:auto;color:var(--red)}
+  .acts .danger:hover{border-color:var(--red)}
+
+  /* ===== Sedes ===== */
+  .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
+  .sede{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--acc);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .sede-hd{display:flex;gap:14px;align-items:center}
+  .pic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 12%,var(--panel2));color:var(--acc);flex-shrink:0}
+  .pic .ico{vertical-align:0}
+  .sede-hd b{font-family:var(--cond);font-stretch:80%;font-size:25px;font-weight:600;display:block;line-height:1.1}
+  .sede-hd small{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:5px}
+  .kv6{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .kv6 div{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+  .kv6 small{display:block;color:var(--muted);font-size:12px}
+  .kv6 b{font-size:15px}
+  .sede-ft{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:12px;font-size:13px;color:var(--soft)}
+  .sede-ft>span{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .sede-ft .ico{color:var(--muted)}
+  .sede-ft>div{display:flex;gap:8px}
+
+  /* ===== Modal ===== */
+  .modal{position:fixed;inset:0;background:rgba(19,32,58,.35);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+  .modal.show{display:flex}
+  .mbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:620px;width:100%;max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 30px 60px rgba(19,32,58,.18)}
+  .mbox h2{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600;flex-wrap:wrap}
+  .mbox h2 .ico{color:var(--acc)}
+  .mbox .sub{margin-bottom:18px}
+  .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .fields>label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--soft);min-width:0}
+  .fields .full{grid-column:1/-1}
+  .fields input:not([type=checkbox]),.fields select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:14px;padding:9px 10px;color-scheme:light}
+  .fields input:focus,.fields select:focus{outline:none;border-color:var(--acc)}
+  .sw{display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:12px;font-size:14px!important;font-weight:500!important;color:var(--text)!important;cursor:pointer;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+  .sw small{display:block;color:var(--muted);font-size:12px;font-weight:400}
+  .sw input{appearance:none;width:40px;height:22px;border-radius:99px;background:#cfd5e1;position:relative;flex-shrink:0;cursor:pointer;transition:.2s}
+  .sw input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sw input:checked{background:var(--acc)}.sw input:checked::after{left:21px;background:var(--on-acc)}
+  .chk{display:flex;flex-wrap:wrap;gap:8px}
+  .chk input{display:none}
+  .chk span{display:inline-block;padding:6px 12px;border-radius:99px;border:1px solid var(--line);font-size:13px;color:var(--soft);cursor:pointer;font-weight:500}
+  .chk input:checked+span{background:color-mix(in srgb,var(--acc) 16%,transparent);border-color:var(--acc);color:var(--acc)}
+  .m-tot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);font-size:14px;flex-wrap:wrap}
+  .m-tot b{font-family:var(--cond);font-stretch:80%;font-size:28px;font-weight:600}
+  .m-tot .ok{color:var(--green);display:flex;align-items:center;gap:6px}
+  .m-tot .bad{color:var(--red);display:flex;align-items:center;gap:6px}
+  .m-act{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+  .kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kv div{background:var(--panel2);border-radius:10px;padding:9px 12px;min-width:0}
+  .kv small{display:block;color:var(--muted);font-size:12px}
+  .kv b{font-size:15px;overflow-wrap:anywhere}
+
+  /* ===== App del jugador ===== */
+  .cli-layout{display:grid;grid-template-columns:1fr 390px;gap:40px;align-items:start;max-width:1100px}
+  .cli-info{display:flex;flex-direction:column;gap:22px}
+  .cli-info>.btn{align-self:flex-start}
+  .link-card{display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .link-card b{font-family:var(--cond);font-stretch:80%;font-size:24px;display:block}
+  .link-card small{color:var(--muted)}
+  .how{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:12px}
+  .how li{counter-increment:h;position:relative;padding:3px 0 0 42px;min-height:28px;color:var(--soft);font-size:15px;line-height:1.4}
+  .how li::before{content:counter(h);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--acc);color:var(--on-acc);font-weight:700;display:grid;place-items:center}
+  .how b{color:var(--text)}
+  .phone{width:390px;height:780px;border-radius:44px;background:#05080d;padding:14px;box-shadow:0 0 0 2px #2a3547,0 30px 60px rgba(0,0,0,.5);position:relative}
+  .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#05080d;border-radius:0 0 16px 16px;z-index:3}
+  .scr{height:100%;border-radius:32px;overflow-y:auto;background:var(--bg);position:relative;display:flex;flex-direction:column;scrollbar-width:none}
+  .scr::-webkit-scrollbar{display:none}
+  .c-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:38px 16px 12px;background:rgba(243,240,232,.93);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);text-align:center}
+  .c-head b{font-family:var(--cond);font-stretch:80%;font-size:21px;display:block}
+  .c-head small{color:var(--muted);font-size:12px}
+  .c-ib{width:36px;height:36px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;color:var(--soft);flex-shrink:0}
+  .c-ib.ghost{background:none}
+  .c-ib .ico{vertical-align:0}
+  .c-hero{padding:52px 22px 10px;text-align:center}
+  .c-logo{width:64px;height:64px;border-radius:50%;background:color-mix(in srgb,var(--acc) 14%,#fff);color:var(--acc);display:inline-grid;place-items:center;flex-shrink:0}
+  .c-hero .c-logo{margin-bottom:12px}
+  .c-hero h2{font-size:27px;font-weight:600;margin-bottom:6px}
+  .c-hero p{color:var(--soft);font-size:14px;line-height:1.45}
+  .c-list{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+  .c-sede{display:flex;flex-direction:column;gap:7px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .c-sede:hover{border-color:var(--acc)}
+  .c-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .c-sede b{font-family:var(--cond);font-stretch:80%;font-size:21px;font-weight:600}
+  .c-sede small{color:var(--muted);font-size:12px;display:flex;gap:5px;align-items:center}
+  .c-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--soft)}
+  .c-meta span:not(:last-child)::after{content:"·";margin-left:10px;color:var(--muted)}
+  .c-tags{display:flex;gap:5px;flex-wrap:wrap}
+  .c-tags span{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--panel2);color:var(--muted)}
+  .c-sec{padding:14px 16px 10px;display:flex;flex-direction:column;gap:10px}
+  .c-lbl{font-size:13px;font-weight:700;color:var(--soft);display:flex;justify-content:space-between;margin-top:4px}
+  .c-lbl em{font-style:normal;font-weight:500;color:var(--muted)}
+  .c-days{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .c-days::-webkit-scrollbar{display:none}
+  .c-days button{flex:0 0 52px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+  .c-days small{font-size:11px;color:var(--muted);text-transform:capitalize}
+  .c-days b{font-size:19px}
+  .c-days .on{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}.c-days .on small{color:var(--on-acc)}
+  .c-seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
+  .c-seg button{padding:9px 0;border-radius:9px;font-size:14px;font-weight:600;color:var(--soft)}
+  .c-seg .on{background:var(--acc);color:var(--on-acc)}
+  .c-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .c-slots button{padding:9px 0;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+  .c-slots button:disabled{opacity:.3;text-decoration:line-through}
+  .c-slots .on{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+  .c-court,.c-pay{display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;width:100%}
+  .c-court.on,.c-pay.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+  .c-ic{width:42px;height:42px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 12%,var(--panel2));color:var(--acc)}
+  .c-ic .ico{vertical-align:0}
+  .c-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .c-tx b{font-size:15px}.c-tx small{font-size:12px;color:var(--muted)}
+  .c-pr{font-weight:700;color:var(--acc);font-size:15px}
+  .rad{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0}
+  .c-pay.on .rad{border:6px solid var(--acc)}
+  .c-empty{text-align:center;color:var(--muted);padding:50px 10px;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .c-foot{position:sticky;bottom:0;margin-top:auto;padding:14px 16px 20px;background:linear-gradient(transparent,var(--bg) 30%);display:flex;flex-direction:column;gap:8px}
+  .c-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:var(--on-acc);font-weight:700;font-size:16px;padding:15px;border-radius:14px;box-shadow:0 8px 20px rgba(29,78,216,.22)}
+  .c-btn span{margin-left:auto;background:rgba(255,255,255,.22);padding:3px 10px;border-radius:8px}
+  .c-btn .ico{vertical-align:0}
+  .c-btn:disabled{opacity:.35;box-shadow:none}
+  .c-btn.ghost{background:var(--card);color:var(--text);border:1px solid var(--line);box-shadow:none}
+  .c-btn.ghost span{background:var(--acc);color:var(--on-acc)}
+  .c-form{padding:14px 16px 10px;display:flex;flex-direction:column;gap:14px}
+  .c-form>label{font-size:13px;font-weight:600;color:var(--soft);display:flex;flex-direction:column;gap:6px}
+  .c-form em{font-weight:400;color:var(--muted);font-style:normal}
+  .c-in{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:0 12px;color:var(--muted)}
+  .c-in:focus-within{border-color:var(--acc)}.c-in.bad{border-color:var(--red)}
+  .c-in input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font:inherit;font-size:15px;padding:12px 0}
+  .c-err{color:var(--red);font-size:12px;font-weight:500}
+  .c-ok{display:flex!important;flex-direction:row!important;gap:10px!important;font-weight:400!important;align-items:flex-start}
+  .c-ok input{accent-color:var(--acc);width:18px;height:18px;margin-top:1px;flex-shrink:0}
+  .c-sum{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+  .c-sum div{display:flex;justify-content:space-between;gap:10px}
+  .c-sum span{color:var(--muted)}.c-sum b{text-align:right}
+  .c-sum .big b{font-size:20px;color:var(--acc)}
+  .c-safe{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+  .c-safe .ico{color:var(--green)}
+  .c-done{display:flex;gap:14px;align-items:center;margin:16px 16px 0;padding:14px;border-radius:14px;background:color-mix(in srgb,var(--green) 12%,var(--card));border:1px solid color-mix(in srgb,var(--green) 40%,transparent);color:var(--green)}
+  .c-done b{color:var(--text);display:block;font-size:17px}.c-done small{color:var(--soft);font-size:12px}
+  .c-code{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .c-code small{color:var(--muted);font-size:12px;display:block}
+  .c-code b{font-family:var(--cond);font-stretch:80%;font-size:32px;letter-spacing:3px;color:var(--acc)}
+  .c-res{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+  .c-res.cancelada{opacity:.6}
+  .c-res small{color:var(--muted)}
+  .c-cancel{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;border:1px solid color-mix(in srgb,var(--red) 40%,transparent);color:var(--red);font-weight:600;margin-top:4px}
+  .c-note{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12px;margin-top:4px}
+
+  /* ===== Modo claro (estilo v2) ===== */
+  h1{font-weight:800;font-stretch:85%;letter-spacing:-.6px}
+  aside{background:var(--ink);border-right:none;color:#fff}
+  .brand .logo{background:var(--lime);color:var(--ink)}
+  .brand b{color:#fff}.brand small{color:#aab4ca}
+  .nav-sep{color:#8a94ab}
+  .nav{color:#c9d1e3}
+  .nav:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav.active{background:var(--lime);color:var(--lime-ink);box-shadow:none}
+  .nav .badge{background:#f97316;color:#fff}
+  .nav.active .badge{background:var(--ink);color:var(--lime)}
+  .user{border-top-color:rgba(255,255,255,.12);color:#aab4ca}
+  .user b{color:#fff}
+  .user .av{background:var(--lime);color:var(--ink)}
+  .kpi,.court,.sede,.ag-wrap,.tbl-wrap,.link-card,.c-sede,.c-court,.c-pay{box-shadow:var(--sh)}
+  .ag-wrap,.tbl-wrap{background:var(--card)}
+  .ag-t{background:var(--card)}
+  .ag-c{border-top-color:var(--line2)}
+  .ag-b{background:color-mix(in srgb,var(--c) 10%,#fff);border-color:color-mix(in srgb,var(--c) 30%,#fff);color:var(--text)}
+  .ag-b:hover{background:color-mix(in srgb,var(--c) 17%,#fff);box-shadow:0 6px 14px rgba(19,32,58,.12)}
+  .ag-b b{color:color-mix(in srgb,var(--c) 70%,#13203a)}
+  .kpi{background:var(--card);border-color:var(--line);color:var(--muted)}
+  .kpi.l{background:var(--ink);border-color:var(--ink);color:#aab4ca}.kpi.l b{color:var(--lime)}.kpi.l .ico{color:var(--lime)}
+  .tags span,.c-tags span{background:var(--sunk);border-color:var(--line2);color:var(--soft)}
+  .tags .ico{color:var(--acc)}
+  .nota{color:#7a2e0a;background:#fdeadb}
+  .tbl th{background:var(--card)}
+  .tbl tbody tr:hover{background:var(--sunk)}
+  .btn.ghost{background:var(--card)}
+  .btn.ghost:hover{border-color:var(--soft)}
+  .btn.warn{background:#fbe4e4;border-color:#f3c4c4}
+  .tab{background:var(--card)}
+  .tab.active,.seg button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .pic{background:var(--lime);color:var(--ink)}
+  .sede{border-top-color:var(--acc)}
+  .c-logo{background:var(--lime);color:var(--ink)}
+  .c-head{border-bottom-color:var(--line)}
+  .c-ib{background:var(--card);border:1px solid var(--line);color:var(--soft)}
+  .c-ib.ghost{border:none}
+  .c-days button,.c-seg,.c-slots button{background:var(--card)}
+  .c-days .on,.c-slots .on{background:var(--acc);border-color:var(--acc);color:#fff}.c-days .on small{color:#dbe4ff}
+  .c-seg .on{background:var(--ink);color:#fff}
+  .c-ic{background:#e9effd;color:var(--acc)}
+  .c-in{background:var(--card)}
+  .c-code b{color:var(--acc)}
+  .c-done{background:#e3f4e8;border-color:#b9e2c6}
+  .c-done small{color:var(--soft)}
+  .c-cancel{background:#fbe4e4;border-color:#f3c4c4}
+  .how li::before{background:var(--lime);color:var(--ink)}
+  .modal .mbox{box-shadow:0 30px 60px rgba(19,32,58,.2)}
+  .chk input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
+  .toast{color:#fff}
+
+  /* ===== Multi-cliente ===== */
+  .demo-as{display:flex;flex-direction:column;gap:5px;margin-top:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,.07);border:1px dashed rgba(255,255,255,.2)}
+  .demo-as span{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--lime);font-weight:700}
+  .demo-as select{background:var(--ink);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px;font-size:14px}
+  .user div div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .banner{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:#fdeadb;color:#7a2e0a;font-size:14px;margin-bottom:14px}
+  .banner.bad{background:#fbe4e4;color:#8b1a1a}
+  .slug{color:var(--acc)}
+  .link-card .inp{width:100%}
+  .clink{font-family:ui-monospace,Consolas,monospace;font-size:13px;background:var(--sunk);border:1px solid var(--line2);border-radius:6px;padding:3px 7px;white-space:nowrap}
+  .tbl tr.off td:not(:last-child){opacity:.5}
+  .privado{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-radius:10px;background:#e9effd;color:#1a3fb0;font-size:14px}
+  .privado .ico{margin-top:1px}
+  .c-closed{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:90px 26px;color:var(--muted);flex:1}
+  .c-closed b{color:var(--text);font-size:19px}
+
+  /* Toast */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;transition:.3s;z-index:30;max-width:calc(100vw - 32px)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  @media (prefers-reduced-motion:reduce){ .menu,.menu > *{transition:none!important} .burger .ico{animation:none} }
+  @media (max-width:1200px){ .sgrid{grid-template-columns:1fr} .legend{margin-left:0} }
+  @media (max-width:960px){
+    body{flex-direction:column}
+    aside{width:100%;height:auto;top:0;z-index:20;padding:10px 12px;gap:0}
+    .aside-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .brand{margin:0 0 0 4px;min-width:0}.brand small{display:none}.brand b{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand .logo{width:38px;height:38px}
+    .burger{display:grid;flex-shrink:0}
+    .menu{max-height:0;opacity:0;visibility:hidden;overflow:hidden;padding:0 2px;transform:translateY(-8px);
+      transition:max-height .35s ease,padding .35s ease,opacity .25s ease,transform .35s ease,visibility 0s linear .35s}
+    aside.open .menu{max-height:calc(100vh - 64px);opacity:1;visibility:visible;overflow-y:auto;padding:8px 2px 4px;transform:none;
+      transition:max-height .35s ease,padding .35s ease,opacity .25s ease .05s,transform .35s ease,visibility 0s}
+    .menu > *{transition:opacity .25s ease,transform .25s ease;opacity:0;transform:translateX(-10px)}
+    aside.open .menu > *{opacity:1;transform:none}
+    aside.open .menu > :nth-child(1){transition-delay:0.04s}aside.open .menu > :nth-child(2){transition-delay:0.07s}aside.open .menu > :nth-child(3){transition-delay:0.10s}aside.open .menu > :nth-child(4){transition-delay:0.13s}aside.open .menu > :nth-child(5){transition-delay:0.16s}aside.open .menu > :nth-child(6){transition-delay:0.19s}aside.open .menu > :nth-child(7){transition-delay:0.22s}aside.open .menu > :nth-child(8){transition-delay:0.25s}aside.open .menu > :nth-child(9){transition-delay:0.28s}aside.open .menu > :nth-child(10){transition-delay:0.31s}aside.open .menu > :nth-child(11){transition-delay:0.34s}aside.open .menu > :nth-child(12){transition-delay:0.37s}
+    .burger .ico{animation:burgerIn .3s ease}
+    @keyframes burgerIn{from{transform:rotate(-90deg) scale(.6);opacity:0}to{transform:none;opacity:1}}
+    .user{margin-top:12px}
+    main{padding:16px}
+    h1{font-size:30px}
+    .cli-layout{grid-template-columns:minmax(0,1fr)}.cli-info{min-width:0}.link-card{min-width:0}.link-card b{font-size:19px;overflow-wrap:anywhere}
+    .phone{width:100%;max-width:390px;margin:0 auto}
+    .fields,.kv{grid-template-columns:1fr}
+    .kv6{grid-template-columns:repeat(2,1fr)}
+    .cgrid{grid-template-columns:1fr}
+    .ag-wrap{max-height:none}
+    .kpis{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:10px}.kpi{min-width:0;padding:10px 12px;gap:10px}.kpi b{font-size:20px}
+    .legend{gap:10px 14px}
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="aside-top">
+    <div class="brand"><span class="logo"><i data-i="racket" data-s="26"></i></span><div><b id="brandN">Padel Club</b><small id="brandS">Turnos &amp; Reservas</small></div></div>
+    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><i data-i="menu" data-s="24"></i></button>
+  </div>
+  <div class="menu" id="menu">
+  <div class="nav-sep" data-rol="owner">Plataforma</div>
+  <button class="nav" data-view="clientes" data-rol="owner"><i data-i="building-2"></i>Clientes <span class="badge" id="bCli">0</span></button>
+  <div class="nav-sep" data-rol="admin">Gestión</div>
+  <button class="nav active" data-view="agenda" data-rol="admin"><i data-i="calendar-days"></i>Agenda</button>
+  <button class="nav" data-view="reservas" data-rol="admin"><i data-i="list"></i>Reservas <span class="badge" id="bRes">0</span></button>
+  <button class="nav" data-view="canchas" data-rol="admin"><i data-i="layout-grid"></i>Canchas</button>
+  <button class="nav" data-view="sedes" data-rol="admin"><i data-i="building-2"></i>Sedes</button>
+  <div class="nav-sep" data-rol="admin owner">Jugadores</div>
+  <button class="nav" data-view="app" data-rol="admin owner"><i data-i="smartphone"></i>Sitio de reservas</button>
+  <div class="user"><span class="av" id="uAv">BU</span><div style="min-width:0"><b id="uName">Brenda U.</b><div id="uRol">Administración</div></div></div>
+  <label class="demo-as"><span>Demo · ver como</span><select id="verComo" onchange="cambiarSesion(this.value)"></select></label>
+  </div>
+</aside>
+
+<main>
+  <div id="banner"></div>
+  <!-- CLIENTES (dueño de la plataforma) -->
+  <section class="view" id="v-clientes">
+    <header class="top"><div><h1>Clientes</h1><div class="sub">Clubes que usan la plataforma con abono mensual. Cada uno tiene su link y sus datos separados.</div></div>
+      <button class="btn primary" onclick="nuevoCliente()"><i data-i="plus"></i>Nuevo cliente</button></header>
+    <div class="kpis" id="clKpis" style="margin-bottom:16px"></div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Club</th><th>Link de reservas</th><th>Sedes · canchas</th><th class="num">Reservas del mes</th><th class="num">Abono</th><th>Pago del mes</th><th>Sitio</th><th></th></tr></thead>
+      <tbody id="clBody"></tbody></table></div>
+    <div class="privado"><i data-i="shield-check"></i><span>La facturación de cada club es privada: solo la ve el administrador de ese club. Acá ves el uso y el estado del abono.</span></div>
+  </section>
+
+  <!-- AGENDA -->
+  <section class="view active" id="v-agenda">
+    <header class="top">
+      <div class="title-row"><h1>Agenda</h1><div class="when"><i data-i="calendar-days"></i><span id="agFecha"></span></div></div>
+      <div class="kpis">
+        <div class="kpi l"><i data-i="trending-up" data-s="26"></i><div>Ocupación<b id="kOcc">–</b></div></div>
+        <div class="kpi"><i data-i="ticket" data-s="26"></i><div>Reservas<b id="kRes">–</b></div></div>
+        <div class="kpi g"><i data-i="coins" data-s="26"></i><div>Facturación del día<b id="kIng">–</b></div></div>
+        <div class="kpi a"><i data-i="wallet" data-s="26"></i><div>Saldo a cobrar<b id="kPen">–</b></div></div>
+      </div>
+    </header>
+    <div class="toolbar">
+      <select id="agSede" onchange="ag.sede=+this.value;renderAgenda()"></select>
+      <div class="datenav">
+        <button onclick="ag.fecha=addD(ag.fecha,-1);renderAgenda()" title="Día anterior"><i data-i="chevron-left"></i></button>
+        <button class="hoy" onclick="ag.fecha=TODAY;renderAgenda()">Hoy</button>
+        <button onclick="ag.fecha=addD(ag.fecha,1);renderAgenda()" title="Día siguiente"><i data-i="chevron-right"></i></button>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--green)"></i>Pagada</span>
+        <span><i class="dot" style="background:var(--blue)"></i>Señada</span>
+        <span><i class="dot" style="background:var(--amber)"></i>Pendiente de pago</span>
+        <span><i data-i="repeat" data-s="14" style="color:var(--violet)"></i>Turno fijo</span>
+      </div>
+      <button class="btn primary" onclick="nuevaReserva()"><i data-i="plus"></i>Nueva reserva</button>
+    </div>
+    <div class="ag-wrap" id="agenda"></div>
+  </section>
+
+  <!-- RESERVAS -->
+  <section class="view" id="v-reservas">
+    <header class="top"><div><h1>Reservas</h1><div class="sub">Todas las reservas de las sedes, desde la app y desde el mostrador</div></div>
+      <button class="btn primary" onclick="nuevaReserva()"><i data-i="plus"></i>Nueva reserva</button></header>
+    <div class="filters">
+      <div class="search-wrap"><i data-i="search"></i><input class="inp" id="rQ" placeholder="Buscar por cliente, código o celular…"></div>
+      <select id="rSede" onchange="rf.sede=+this.value;renderReservas()"></select>
+      <select id="rEst" onchange="rf.estado=this.value;renderReservas()">
+        <option value="">Todos los estados</option><option value="pagada">Pagada</option><option value="senada">Señada</option>
+        <option value="pendiente">Pendiente de pago</option><option value="cancelada">Cancelada</option></select>
+      <div class="seg" id="rRango"></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Código</th><th>Fecha y hora</th><th>Sede · Cancha</th><th>Cliente</th><th>Origen</th><th class="num">Importe</th><th>Estado</th></tr></thead>
+      <tbody id="rBody"></tbody></table></div>
+    <div class="tbl-foot" id="rFoot"></div>
+  </section>
+
+  <!-- CANCHAS -->
+  <section class="view" id="v-canchas">
+    <header class="top"><div><h1>Canchas</h1><div class="sub">Tipo, techo, precios por hora y disponibilidad de cada cancha</div></div>
+      <button class="btn primary" onclick="editCancha(0)"><i data-i="plus"></i>Nueva cancha</button></header>
+    <div class="bar"><div class="tabs" id="cTabs"></div></div>
+    <div class="cgrid" id="cGrid"></div>
+  </section>
+
+  <!-- SEDES -->
+  <section class="view" id="v-sedes">
+    <header class="top"><div><h1>Sedes</h1><div class="sub">Horarios, duración de turnos, señas y política de cancelación de cada sede</div></div>
+      <button class="btn primary" onclick="editSede(0)"><i data-i="plus"></i>Nueva sede</button></header>
+    <div class="sgrid" id="sGrid"></div>
+  </section>
+
+  <!-- APP DEL JUGADOR -->
+  <section class="view" id="v-app">
+    <header class="top"><div><h1>Sitio de reservas</h1><div class="sub">Así reserva el jugador desde su celular, entrando al link de su club</div></div></header>
+    <div class="cli-layout">
+      <div class="cli-info">
+        <div class="link-card" id="appLink"></div>
+        <ol class="how">
+          <li><b>Entra al link de su club</b>: solo ve las sedes y turnos de ese club, nunca los de otros.</li>
+          <li><b>Elige la sede</b> donde quiere jugar.</li>
+          <li><b>Elige día, duración y horario</b>: solo ve turnos libres, en tiempo real.</li>
+          <li><b>Elige la cancha</b> según tipo, techo y precio.</li>
+          <li><b>Carga sus datos</b> (nombre y celular), sin crear cuenta.</li>
+          <li><b>Paga la seña o el total</b> online, o paga en el club si la sede lo permite.</li>
+          <li>La reserva aparece al instante en la <b>Agenda de ese club</b>, marcada como <b>App</b>.</li>
+          <li>Desde <b>Mis reservas</b> puede cancelar dentro del plazo que fija la sede.</li>
+        </ol>
+        <button class="btn ghost" onclick="appReset()"><i data-i="repeat"></i>Reiniciar demo del jugador</button>
+      </div>
+      <div class="phone" id="phone"><div class="notch"></div><div class="scr"></div></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal" onclick="if(event.target===this)cerrarModal()"><div class="mbox" id="mBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Iconos: Lucide (licencia ISC) embebidos como SVG; "racket" es propio */
+const ICONS = {
+  "menu":'<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
+  "racket":'<path d="M10 2c3.9 0 7 2.9 7 6.6 0 2.3-1.1 4.2-3 5.4l-1.6 1H7.6L6 14c-1.9-1.2-3-3.1-3-5.4C3 4.9 6.1 2 10 2z"/><path d="M8.2 15.2 7.4 19M11.8 15.2l.8 3.8"/><path d="M6.6 18.8h6.8v3H6.6z"/><path d="M7.5 6.5h.01M10 6h.01M12.5 6.5h.01M7 9.2h.01M10 9h.01M13 9.2h.01M8.5 11.6h.01M11.5 11.6h.01"/>',
+  "calendar-days":'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>',
+  "list":'<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+  "layout-grid":'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  "building-2":'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+  "smartphone":'<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+  "chevron-left":'<path d="m15 18-6-6 6-6"/>',
+  "chevron-right":'<path d="m9 18 6-6-6-6"/>',
+  "map-pin":'<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  "user":'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  "phone":'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  "mail":'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  "arrow-left":'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  "circle-check":'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  "circle-check-big":'<path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/>',
+  "circle-x":'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  "circle-plus":'<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>',
+  "check":'<path d="M20 6 9 17l-5-5"/>',
+  "x":'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  "plus":'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  "info":'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  "shield-check":'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  "wallet":'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  "credit-card":'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+  "banknote":'<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  "store":'<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>',
+  "send":'<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+  "search":'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  "coins":'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+  "clock":'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  "trending-up":'<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  "ticket":'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+  "pencil":'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  "trash-2":'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  "wrench":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  "repeat":'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+  "sun":'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  "house":'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  "share-2":'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+  "calendar-plus":'<path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="M16 19h6"/><path d="M19 16v6"/>'
+};
+const ic = (n,s=18) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
+document.querySelectorAll('[data-i]').forEach(e => { const st = e.getAttribute('style'); e.outerHTML = ic(e.dataset.i, +e.dataset.s||undefined).replace('<svg ', st?`<svg style="${st}" `:'<svg '); });
+
+/* ---------- Utilidades ---------- */
+const $ = s => document.querySelector(s);
+const money = n => '$' + Math.round(n).toLocaleString('es-AR');
+const toMin = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
+const hm = m => { m = ((m%1440)+1440)%1440; return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); };
+const dkey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const kDate = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y,m-1,d); };
+const addD = (k,n) => { const d = kDate(k); d.setDate(d.getDate()+n); return dkey(d); };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const dLabel = (k,opt={weekday:'long',day:'numeric',month:'long'}) => cap(kDate(k).toLocaleDateString('es-AR',opt));
+const dShort = k => dLabel(k,{weekday:'short',day:'numeric',month:'short'});
+const nowMin = () => { const n = new Date(); return n.getHours()*60+n.getMinutes(); };
+const TODAY = dkey(new Date());
+const opt = (v,t,sel) => `<option value="${v}" ${String(v)===String(sel)?'selected':''}>${t}</option>`;
+const PHONE_RE = /^[0-9 +()-]{8,}$/;
+const ESTADO = {pagada:'Pagada', senada:'Señada', pendiente:'Pendiente de pago', cancelada:'Cancelada'};
+
+/* ---------- Datos ---------- */
+const SERVICIOS = ['Vestuarios','Duchas','Estacionamiento','Bar','Tienda','Alquiler de paletas','Clases','Wi-Fi'];
+// Cada club es un cliente que paga el abono mensual. Sus datos están separados del resto.
+const CLUBES = [
+  {id:'padelpoint',n:'PadelPoint',pref:'PP',admin:'Brenda U.',mail:'admin@padelpoint.com',abono:45000,desde:'2026-03-01',pago:'al día',activo:true},
+  {id:'tupadel',n:'TuPadel',pref:'TP',admin:'Martín R.',mail:'martin@tupadel.com.ar',abono:35000,desde:'2026-06-15',pago:'al día',activo:true},
+  {id:'matchpoint',n:'Match Point',pref:'MP',admin:'Carla S.',mail:'carla@matchpoint.ar',abono:35000,desde:'2026-08-01',pago:'vencido',activo:true},
+];
+const club = id => CLUBES.find(c=>c.id===id);
+const SEDES = [
+  {id:1,club:'padelpoint',n:'Sede Norte',dir:'Av. del Libertador 5200, Vicente López',tel:'11 4790 1200',abre:'08:00',cierra:'00:00',turno:90,pico:'18:00',sena:50,cancel:24,pagoClub:true,
+   servicios:['Vestuarios','Duchas','Estacionamiento','Bar','Alquiler de paletas']},
+  {id:2,club:'padelpoint',n:'Sede Centro',dir:'Av. Córdoba 3400, CABA',tel:'11 4861 3300',abre:'09:00',cierra:'23:30',turno:60,pico:'19:00',sena:100,cancel:12,pagoClub:false,
+   servicios:['Vestuarios','Bar','Tienda','Wi-Fi']},
+  {id:3,club:'tupadel',n:'TuPadel Palermo',dir:'Godoy Cruz 2800, Palermo',tel:'11 4777 5500',abre:'07:00',cierra:'23:00',turno:90,pico:'18:30',sena:50,cancel:24,pagoClub:true,
+   servicios:['Vestuarios','Duchas','Bar','Clases']},
+  {id:4,club:'matchpoint',n:'Match Point Quilmes',dir:'Av. Calchaquí 1450, Quilmes',tel:'11 4250 8800',abre:'09:00',cierra:'00:00',turno:60,pico:'19:00',sena:30,cancel:12,pagoClub:true,
+   servicios:['Estacionamiento','Bar','Alquiler de paletas']},
+];
+// Precios por hora: "valle" antes del horario pico de la sede, "pico" desde ese horario
+const CANCHAS = [
+  {id:1,sede:1,n:'Cancha 1',tipo:'Panorámica',techo:'Cubierta',sup:'Césped sintético',valle:20000,pico:26000,estado:'activa',nota:''},
+  {id:2,sede:1,n:'Cancha 2',tipo:'Cristal',techo:'Cubierta',sup:'Césped sintético',valle:18000,pico:24000,estado:'activa',nota:''},
+  {id:3,sede:1,n:'Cancha 3',tipo:'Cristal',techo:'Descubierta',sup:'Césped sintético',valle:15000,pico:20000,estado:'activa',nota:''},
+  {id:4,sede:1,n:'Cancha 4',tipo:'Muro',techo:'Descubierta',sup:'Cemento',valle:12000,pico:16000,estado:'mantenimiento',nota:'Cambio de césped, vuelve el lunes'},
+  {id:5,sede:2,n:'Cancha A',tipo:'Cristal',techo:'Cubierta',sup:'Césped sintético',valle:17000,pico:22000,estado:'activa',nota:''},
+  {id:6,sede:2,n:'Cancha B',tipo:'Cristal',techo:'Cubierta',sup:'Césped sintético',valle:17000,pico:22000,estado:'activa',nota:''},
+  {id:7,sede:2,n:'Cancha C',tipo:'Muro',techo:'Cubierta',sup:'Moqueta',valle:13000,pico:17000,estado:'activa',nota:''},
+  {id:8,sede:3,n:'Central',tipo:'Panorámica',techo:'Cubierta',sup:'Césped sintético',valle:19000,pico:25000,estado:'activa',nota:''},
+  {id:9,sede:3,n:'Cancha 2',tipo:'Cristal',techo:'Cubierta',sup:'Césped sintético',valle:16000,pico:21000,estado:'activa',nota:''},
+  {id:10,sede:3,n:'Cancha 3',tipo:'Cristal',techo:'Descubierta',sup:'Césped sintético',valle:14000,pico:18000,estado:'activa',nota:''},
+  {id:11,sede:4,n:'Cancha 1',tipo:'Cristal',techo:'Cubierta',sup:'Césped sintético',valle:14000,pico:18000,estado:'activa',nota:''},
+  {id:12,sede:4,n:'Cancha 2',tipo:'Muro',techo:'Descubierta',sup:'Cemento',valle:10000,pico:13000,estado:'activa',nota:''},
+];
+// Sesión actual. En producción la define el login; acá se cambia con "Demo · ver como".
+const ses = {rol:'admin', club:'padelpoint'};
+const misSedes = () => SEDES.filter(x=>x.club===ses.club);
+const esMia = r => sede(r.sede).club===ses.club;
+const sede = id => SEDES.find(s=>s.id===id);
+const cancha = id => CANCHAS.find(c=>c.id===id);
+const closeMin = s => { const c = toMin(s.cierra); return c<=toMin(s.abre) ? c+1440 : c; };
+const precio = (c,ini,dur) => Math.round(((ini>=toMin(sede(c.sede).pico)) ? c.pico : c.valle) * dur/60 / 100) * 100;
+const vigente = r => r.estado!=='cancelada';
+const libre = (cid,f,ini,dur,excl) => !RES.some(r=>r.id!==excl && vigente(r) && r.cancha===cid && r.fecha===f && r.ini<ini+dur && ini<r.ini+r.dur);
+const pasado = (f,ini) => f<TODAY || (f===TODAY && ini<nowMin());
+const pagado = r => r.estado==='pagada' ? r.monto : r.estado==='senada' ? Math.round(r.monto*sede(r.sede).sena/100) : 0;
+
+let RES = [], rseq = 2400;
+function crear(o){
+  const c = cancha(o.cid), s = sede(c.sede);
+  const r = {id:++rseq, code:club(s.club).pref+'-'+rseq, sede:c.sede, cancha:c.id, fecha:o.f, ini:o.ini, dur:o.dur, cliente:o.cliente, tel:o.tel,
+    estado: o.estado==='senada' && s.sena===100 ? 'pagada' : o.estado, origen:o.origen, fijo:!!o.fijo, monto:precio(c,o.ini,o.dur)};
+  RES.push(r); return r;
+}
+// Reservas de ejemplo (ayer + próximos 7 días), generadas de forma determinística
+(() => {
+  const NOM = ['Martín Gómez','Lucía Fernández','Diego Sosa','Sofía Romero','Juan Pérez','Camila Díaz','Nicolás Álvarez','Valentina Torres',
+               'Federico Ruiz','Agustina López','Tomás Herrera','Florencia Castro','Matías Molina','Julieta Ríos','Santiago Vega','Carolina Medina'];
+  let seed = 7; const R = () => (seed = seed*16807 % 2147483647) / 2147483647;
+  for(let o=-1; o<=7; o++){ const f = addD(TODAY,o);
+    CANCHAS.forEach(c => { if(c.estado!=='activa') return; const s = sede(c.sede);
+      let t = toMin(s.abre); const end = closeMin(s), pico = toMin(s.pico);
+      while(t < end){
+        const dur = s.turno===90 ? 90 : (R()<.7 ? 60 : 90);
+        const ocupa = R() < (t>=pico ? .85 : .4) * (o>3 ? .6 : 1);
+        if(ocupa && t+dur<=end){
+          const x = R(), past = pasado(f,t+dur);
+          const estado = past ? 'pagada' : x<.5 ? 'pagada' : x<.85 ? 'senada' : 'pendiente';
+          crear({cid:c.id, f, ini:t, dur, cliente:NOM[Math.floor(R()*NOM.length)], tel:`11 ${4000+Math.floor(R()*5999)} ${1000+Math.floor(R()*8999)}`,
+                 estado, origen:R()<.6?'app':'mostrador', fijo:R()<.1});
+          t += dur;
+        } else t += 30;
+      }
+    });
+  }
+  // un par de cancelaciones para que se vean en el listado
+  RES.filter(r=>r.fecha>TODAY).slice(3,5).forEach(r=>r.estado='cancelada');
+})();
+
+/* ---------- Navegación ---------- */
+document.querySelectorAll('.nav').forEach(b => b.onclick = () => { go(b.dataset.view); toggleMenu(false); });
+function toggleMenu(open){
+  const a = document.querySelector('aside'), btn = $('#burger');
+  open = open ?? !a.classList.contains('open');
+  a.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open); btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  btn.innerHTML = ic(open ? 'x' : 'menu', 24);
+}
+$('#burger').onclick = () => toggleMenu();
+let vista = 'agenda';
+const permitido = v => !!document.querySelector(`.nav[data-view="${v}"]`)?.dataset.rol.split(' ').includes(ses.rol);
+function go(v){
+  if(!permitido(v)) v = ses.rol==='owner' ? 'clientes' : 'agenda';
+  vista = v;
+  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));
+  renderAll(); window.scrollTo(0,0);
+}
+
+/* ---------- Agenda ---------- */
+const ag = {sede:1, fecha:TODAY};
+function renderAgenda(){
+  const ms = misSedes();
+  $('#agSede').innerHTML = ms.map(x=>opt(x.id,x.n,ag.sede)).join('');
+  const s = ms.find(x=>x.id===ag.sede) || ms[0];
+  if(!s){ ['#kOcc','#kRes','#kIng','#kPen'].forEach(k=>$(k).textContent='—'); $('#agFecha').textContent = dLabel(ag.fecha);
+    $('#agenda').innerHTML = `<div class="vacio">Todavía no cargaste sedes. Empezá en <b>Sedes → Nueva sede</b>.</div>`; return; }
+  ag.sede = s.id;
+  const cs = CANCHAS.filter(c=>c.sede===s.id);
+  const a = toMin(s.abre), e = closeMin(s), S = (e-a)/30, H = 26;
+  $('#agSede').value = s.id;
+  $('#agFecha').textContent = dLabel(ag.fecha) + (ag.fecha===TODAY ? ' · Hoy' : '');
+  const dia = RES.filter(r=>r.sede===s.id && r.fecha===ag.fecha && vigente(r) && r.ini>=a && r.ini+r.dur<=e);
+  const act = cs.filter(c=>c.estado==='activa');
+  const capMin = act.length*(e-a), usados = dia.reduce((x,r)=>x+r.dur,0);
+  $('#kOcc').textContent = capMin ? Math.round(usados/capMin*100)+'%' : '—';
+  $('#kRes').textContent = dia.length;
+  $('#kIng').textContent = money(dia.reduce((x,r)=>x+r.monto,0));
+  $('#kPen').textContent = money(dia.reduce((x,r)=>x+r.monto-pagado(r),0));
+  if(!cs.length){ $('#agenda').innerHTML = `<div class="vacio">Esta sede todavía no tiene canchas. Agregalas desde <b>Canchas</b>.</div>`; return; }
+
+  let h = `<div class="ag" style="grid-template-columns:62px repeat(${cs.length},minmax(160px,1fr));grid-template-rows:58px repeat(${S},${H}px);min-width:${62+cs.length*160}px">
+    <div class="ag-corner"></div>`;
+  cs.forEach((c,i) => h += `<div class="ag-hd ${c.estado}" style="grid-column:${i+2}"><b>${c.n}</b><small>${c.tipo} · ${c.techo}</small></div>`);
+  for(let k=0; k<S; k++){
+    const m = a+k*30, past = pasado(ag.fecha,m);
+    h += `<div class="ag-t" style="grid-row:${k+2}">${m%60 ? '' : `<span ${k?'':'style="top:2px"'}>${hm(m)}</span>`}</div>`;
+    cs.forEach((c,i) => { if(c.estado!=='activa') return;
+      h += `<button class="ag-c ${m%60?'':'hr'} ${past?'past':''}" style="grid-row:${k+2};grid-column:${i+2}" ${past?'disabled':''}
+        onclick="nuevaReserva(${c.id},'${ag.fecha}',${m})" aria-label="Reservar ${c.n} a las ${hm(m)}"></button>`; });
+  }
+  cs.forEach((c,i) => { if(c.estado!=='activa')
+    h += `<div class="ag-mant" style="grid-column:${i+2};grid-row:2 / span ${S}">${ic('wrench',22)}<b>En mantenimiento</b>${c.nota?`<span>${c.nota}</span>`:''}</div>`; });
+  dia.forEach(r => { const i = cs.findIndex(c=>c.id===r.cancha); if(i<0) return;
+    h += `<button class="ag-b ${r.estado}" style="grid-column:${i+2};grid-row:${(r.ini-a)/30+2} / span ${r.dur/30}" onclick="verReserva(${r.id})">
+      <b>${r.fijo?ic('repeat',12):''}${r.cliente}</b>
+      <small>${hm(r.ini)}–${hm(r.ini+r.dur)} · ${ESTADO[r.estado]}</small>
+      ${r.dur>=90?`<small>${r.origen==='app'?ic('smartphone',11)+' App':ic('store',11)+' Mostrador'} · ${money(r.monto)}</small>`:''}</button>`; });
+  const nm = nowMin();
+  if(ag.fecha===TODAY && nm>=a && nm<e)
+    h += `<div class="ag-now" style="grid-row:${Math.floor((nm-a)/30)+2};grid-column:2 / -1;margin-top:${(nm-a)%30/30*H}px"></div>`;
+  $('#agenda').innerHTML = h + '</div>';
+}
+
+/* ---------- Modal ---------- */
+function modal(html){ $('#mBody').innerHTML = html; $('#modal').classList.add('show'); }
+function cerrarModal(){ $('#modal').classList.remove('show'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') cerrarModal(); });
+
+/* Alta de reserva desde el mostrador */
+function nuevaReserva(cid, f, ini){
+  const s = cid ? sede(cancha(cid).sede) : (misSedes().find(x=>x.id===ag.sede) || misSedes()[0]);
+  if(!s) return toast('Primero creá una sede', true);
+  const cs = CANCHAS.filter(c=>c.sede===s.id && c.estado==='activa');
+  if(!cs.length) return toast('La sede no tiene canchas activas', true);
+  f = f || (ag.fecha<TODAY ? TODAY : ag.fecha);
+  if(ini==null){ // primer horario libre
+    const a = toMin(s.abre), e = closeMin(s);
+    outer: for(let m=a; m<e; m+=30){ if(pasado(f,m)) continue; for(const c of cs){ if(m+s.turno<=e && libre(c.id,f,m,s.turno)){ cid=c.id; ini=m; break outer; } } }
+    if(ini==null){ cid = cs[0].id; ini = a; }
+  }
+  const slots = []; for(let m=toMin(s.abre); m<closeMin(s); m+=30) slots.push(m);
+  modal(`<h2>${ic('circle-plus',22)} Nueva reserva</h2><div class="sub">${s.n} · reserva tomada en el mostrador o por teléfono</div>
+    <div class="fields">
+      <label>Cancha<select id="nC" onchange="nCheck()">${cs.map(c=>opt(c.id,`${c.n} · ${c.tipo}`,cid)).join('')}</select></label>
+      <label>Fecha<input type="date" id="nF" value="${f}" min="${TODAY}" onchange="nCheck()"></label>
+      <label>Hora de inicio<select id="nH" onchange="nCheck()">${slots.map(m=>opt(m,hm(m),ini)).join('')}</select></label>
+      <label>Duración<select id="nD" onchange="nCheck()">${[60,90,120].map(d=>opt(d,d+' minutos',s.turno)).join('')}</select></label>
+      <label>Nombre del cliente<input id="nNom" placeholder="Ej: Martín Gómez"></label>
+      <label>Celular<input id="nTel" inputmode="tel" placeholder="11 5555 5555"></label>
+      <label class="full">Estado del pago<select id="nEst" onchange="nCheck()">
+        ${opt('pendiente','Pendiente: paga al llegar','pendiente')}${s.sena<100?opt('senada',`Señada (${s.sena}%)`):''}${opt('pagada','Pagada')}</select></label>
+      <label class="sw full"><span>Turno fijo semanal<small>Reserva también el mismo día y horario las próximas 3 semanas</small></span><input type="checkbox" id="nFijo"></label>
+    </div>
+    <div class="m-tot"><span id="nDisp"></span><b id="nTot"></b></div>
+    <div class="m-act"><button class="btn ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn primary" id="nSave" onclick="guardarNueva()">${ic('check',18)}Confirmar reserva</button></div>`);
+  nCheck();
+}
+const nVals = () => ({cid:+$('#nC').value, f:$('#nF').value, ini:+$('#nH').value, dur:+$('#nD').value});
+function nCheck(){
+  const v = nVals(), c = cancha(v.cid), s = sede(c.sede);
+  let ok = true, msg = 'Horario disponible';
+  if(!v.f){ ok=false; msg='Elegí una fecha'; }
+  else if(v.ini+v.dur > closeMin(s)){ ok=false; msg=`Excede el cierre de la sede (${hm(closeMin(s))})`; }
+  else if(pasado(v.f,v.ini)){ ok=false; msg='Ese horario ya pasó'; }
+  else if(!libre(v.cid,v.f,v.ini,v.dur)){ ok=false; msg='La cancha está ocupada en ese horario'; }
+  $('#nDisp').innerHTML = `<span class="${ok?'ok':'bad'}">${ic(ok?'circle-check':'circle-x',18)} ${msg}</span>`;
+  $('#nTot').textContent = money(precio(c,v.ini,v.dur));
+  $('#nSave').disabled = !ok;
+  return ok;
+}
+function guardarNueva(){
+  if(!nCheck()) return;
+  const v = nVals(), nom = $('#nNom').value.trim(), tel = $('#nTel').value.trim();
+  if(nom.length<2) return toast('Ingresá el nombre del cliente', true);
+  if(!PHONE_RE.test(tel)) return toast('Ingresá un celular válido (mín. 8 dígitos)', true);
+  const fijo = $('#nFijo').checked, base = {cid:v.cid, ini:v.ini, dur:v.dur, cliente:nom, tel, origen:'mostrador', fijo};
+  const r = crear({...base, f:v.f, estado:$('#nEst').value});
+  let ok = 0, choca = [];
+  if(fijo) for(let w=1; w<=3; w++){ const f2 = addD(v.f,7*w);
+    if(libre(v.cid,f2,v.ini,v.dur)){ crear({...base, f:f2, estado:'pendiente'}); ok++; } else choca.push(dShort(f2)); }
+  cerrarModal(); ag.sede = r.sede; ag.fecha = v.f; renderAll();
+  toast(`Reserva ${r.code} confirmada · ${cancha(v.cid).n} ${hm(v.ini)}` + (fijo ? ` · turno fijo +${ok} semanas${choca.length?` (ocupado: ${choca.join(', ')})`:''}` : ''), choca.length>0);
+}
+
+/* Detalle de reserva */
+function verReserva(id){
+  const r = RES.find(x=>x.id===id), c = cancha(r.cancha), s = sede(r.sede), pg = pagado(r), saldo = r.monto-pg;
+  const kv = (k,v) => `<div><small>${k}</small><b>${v}</b></div>`;
+  modal(`<h2>${ic('ticket',22)} Reserva ${r.code} <span class="pill ${r.estado}">${ESTADO[r.estado]}</span></h2>
+    <div class="sub">${s.n} · ${c.n} (${c.tipo}, ${c.techo.toLowerCase()})</div>
+    <div class="kv">
+      ${kv('Cliente',r.cliente)}${kv('Celular',r.tel)}
+      ${kv('Fecha',dLabel(r.fecha))}${kv('Horario',`${hm(r.ini)} a ${hm(r.ini+r.dur)} · ${r.dur} min`)}
+      ${kv('Origen',(r.origen==='app'?'App de reservas':'Mostrador') + (r.fijo?' · turno fijo':''))}${kv('Total',money(r.monto))}
+      ${kv('Pagado',money(pg))}${kv('Saldo',saldo>0&&vigente(r)?`<span style="color:var(--amber)">${money(saldo)}</span>`:money(0))}
+    </div>
+    <div class="m-act">
+      ${vigente(r)?`<button class="btn warn" onclick="cancelarRes(${r.id})">${ic('x',16)}Cancelar reserva</button>`:''}
+      <button class="btn ghost" onclick="waRes(${r.id})">${ic('send',16)}WhatsApp</button>
+      ${vigente(r)&&saldo>0?`<button class="btn primary" onclick="cobrar(${r.id})">${ic('banknote',16)}Cobrar ${money(saldo)}</button>`
+        :`<button class="btn primary" onclick="cerrarModal()">Cerrar</button>`}
+    </div>`);
+}
+function cobrar(id){ const r = RES.find(x=>x.id===id), s = r.monto-pagado(r); r.estado='pagada'; cerrarModal(); renderAll(); toast(`Cobrado ${money(s)} · ${r.code} saldada`); }
+function cancelarRes(id){ const r = RES.find(x=>x.id===id), pg = pagado(r); r.estado='cancelada'; cerrarModal(); renderAll();
+  toast(`${r.code} cancelada · el horario quedó libre${pg?` · reintegrar ${money(pg)}`:''}`, true); }
+function waRes(id){ const r = RES.find(x=>x.id===id); toast(`Se abriría WhatsApp con ${r.cliente} (${r.tel})`); }
+
+/* ---------- Reservas (listado) ---------- */
+const rf = {q:'', sede:0, estado:'', rango:'prox'};
+$('#rQ').oninput = e => { rf.q = e.target.value.trim().toLowerCase(); renderReservas(); };
+function renderReservas(){
+  $('#rSede').innerHTML = opt(0,'Todas las sedes',rf.sede) + misSedes().map(s=>opt(s.id,s.n,rf.sede)).join('');
+  $('#rRango').innerHTML = [['hoy','Hoy'],['prox','Próximos 7 días'],['todas','Todas']].map(([k,t])=>`<button class="${rf.rango===k?'on':''}" onclick="rf.rango='${k}';renderReservas()">${t}</button>`).join('');
+  let l = RES.filter(esMia);
+  if(rf.sede) l = l.filter(r=>r.sede===rf.sede);
+  if(rf.estado) l = l.filter(r=>r.estado===rf.estado);
+  if(rf.rango==='hoy') l = l.filter(r=>r.fecha===TODAY);
+  if(rf.rango==='prox') l = l.filter(r=>r.fecha>=TODAY && r.fecha<=addD(TODAY,7));
+  if(rf.q) l = l.filter(r=>`${r.cliente} ${r.code} ${r.tel}`.toLowerCase().includes(rf.q));
+  l.sort((a,b)=>a.fecha.localeCompare(b.fecha) || a.ini-b.ini || a.cancha-b.cancha);
+  const vis = l.slice(0,100);
+  $('#rBody').innerHTML = vis.length ? vis.map(r=>{ const c = cancha(r.cancha), s = sede(r.sede); return `
+    <tr class="${r.estado}" onclick="verReserva(${r.id})">
+      <td><b>${r.code}</b></td>
+      <td>${dShort(r.fecha)}<small>${hm(r.ini)} a ${hm(r.ini+r.dur)} · ${r.dur} min</small></td>
+      <td>${s.n}<small>${c.n} · ${c.tipo}</small></td>
+      <td>${r.cliente}<small>${r.tel}</small></td>
+      <td><span class="org">${r.origen==='app'?ic('smartphone',14)+'App':ic('store',14)+'Mostrador'}${r.fijo?' · '+ic('repeat',13):''}</span></td>
+      <td class="num">${money(r.monto)}<small>pagado ${money(pagado(r))}</small></td>
+      <td><span class="pill ${r.estado}">${ESTADO[r.estado]}</span></td>
+    </tr>`; }).join('') : `<tr><td colspan="7"><div class="vacio">No hay reservas con esos filtros</div></td></tr>`;
+  const vig = l.filter(vigente);
+  $('#rFoot').innerHTML = `<span>Mostrando <b>${vis.length}</b> de <b>${l.length}</b> reservas</span>
+    <span>Total <b>${money(vig.reduce((x,r)=>x+r.monto,0))}</b> · cobrado <b>${money(vig.reduce((x,r)=>x+pagado(r),0))}</b> · a cobrar <b>${money(vig.reduce((x,r)=>x+r.monto-pagado(r),0))}</b></span>`;
+}
+
+/* ---------- Canchas ---------- */
+const cf = {sede:0};
+function courtSVG(c){
+  const bg = {'Césped sintético':'#1f5fa8','Cemento':'#56606e','Moqueta':'#2f7a4f'}[c.sup] || '#1f5fa8';
+  const wall = c.tipo==='Muro' ? '#8a94a3' : '#9fd8ff';
+  return `<svg viewBox="0 0 200 104" aria-hidden="true"><rect width="200" height="104" fill="#ebe7dd"/>
+    <rect x="8" y="8" width="184" height="88" rx="2" fill="${bg}" stroke="${wall}" stroke-width="${c.tipo==='Panorámica'?2:4}" ${c.tipo==='Panorámica'?'stroke-dasharray="6 3"':''}/>
+    <g stroke="#fff" stroke-width="1.6" fill="none" opacity=".9"><line x1="36" y1="10" x2="36" y2="94"/><line x1="164" y1="10" x2="164" y2="94"/><line x1="36" y1="52" x2="164" y2="52"/></g>
+    <line x1="100" y1="4" x2="100" y2="100" stroke="#e8edf3" stroke-width="3" stroke-dasharray="3 2"/>
+    ${c.techo==='Cubierta'?'<rect x="8" y="8" width="184" height="88" fill="url(#roof)" opacity=".18"/><defs><pattern id="roof" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M0 12 12 0" stroke="#fff" stroke-width="1"/></pattern></defs>':''}
+  </svg>`;
+}
+function renderCanchas(){
+  $('#cTabs').innerHTML = [{id:0,n:'Todas'},...misSedes()].map(s=>`<button class="tab ${cf.sede===s.id?'active':''}" onclick="cf.sede=${s.id};renderCanchas()">${s.n} <span style="opacity:.6">${CANCHAS.filter(c=>s.id?c.sede===s.id:sede(c.sede).club===ses.club).length}</span></button>`).join('');
+  const l = CANCHAS.filter(c=>sede(c.sede).club===ses.club && (!cf.sede || c.sede===cf.sede));
+  $('#cGrid').innerHTML = l.length ? l.map(c=>{ const s = sede(c.sede);
+    const hoy = RES.filter(r=>r.cancha===c.id && r.fecha===TODAY && vigente(r));
+    const occ = c.estado==='activa' ? Math.round(hoy.reduce((x,r)=>x+r.dur,0)/(closeMin(s)-toMin(s.abre))*100) : 0;
+    return `<div class="court ${c.estado}">
+      <div class="court-vis">${courtSVG(c)}<span class="stp ${c.estado}">${c.estado==='activa'?'Activa':'En mantenimiento'}</span></div>
+      <div class="court-bd">
+        <div class="court-hd"><b>${c.n}</b><small>${ic('building-2',13)} ${s.n}</small></div>
+        <div class="tags"><span>${ic(c.techo==='Cubierta'?'house':'sun',13)} ${c.techo}</span><span>${c.tipo}</span><span>${c.sup}</span></div>
+        <div class="kv3"><div><small>Hora valle</small><b>${money(c.valle)}</b></div><div><small>Hora pico · ${s.pico}</small><b>${money(c.pico)}</b></div><div><small>Ocupación hoy</small><b>${c.estado==='activa'?occ+'%':'—'}</b></div></div>
+        ${c.nota?`<div class="nota">${ic('info',15)}<span>${c.nota}</span></div>`:''}
+        <div class="acts">
+          <button class="btn ghost sm" onclick="editCancha(${c.id})">${ic('pencil',15)}Editar</button>
+          <button class="btn ghost sm" onclick="toggleMant(${c.id})">${ic(c.estado==='activa'?'wrench':'circle-check',15)}${c.estado==='activa'?'Mantenimiento':'Reactivar'}</button>
+          <button class="btn ghost sm icon danger" title="Eliminar cancha" onclick="eliminarCancha(${c.id})">${ic('trash-2',15)}</button>
+        </div>
+      </div></div>`; }).join('') : `<div class="vacio">No hay canchas en esta sede</div>`;
+}
+const futuras = id => RES.filter(r=>r.cancha===id && vigente(r) && !pasado(r.fecha,r.ini));
+function toggleMant(id){
+  const c = cancha(id);
+  if(c.estado==='activa'){ c.estado='mantenimiento'; const n = futuras(id).length;
+    toast(`${c.n} en mantenimiento${n?` · ojo: tiene ${n} reservas próximas para reubicar`:''}`, n>0); }
+  else { c.estado='activa'; c.nota=''; toast(`${c.n} reactivada · ya se puede reservar`); }
+  renderAll();
+}
+function eliminarCancha(id){
+  const c = cancha(id), n = futuras(id).length;
+  if(n) return toast(`No se puede eliminar ${c.n}: tiene ${n} reservas próximas`, true);
+  CANCHAS.splice(CANCHAS.indexOf(c),1); toast(`${c.n} eliminada`); renderAll();
+}
+function editCancha(id){
+  if(!id && !misSedes().length) return toast('Primero creá una sede', true);
+  const c = id ? cancha(id) : {n:'',sede:cf.sede||misSedes()[0].id,tipo:'Cristal',techo:'Cubierta',sup:'Césped sintético',valle:15000,pico:20000,estado:'activa',nota:''};
+  modal(`<h2>${ic(id?'pencil':'circle-plus',22)} ${id?'Editar '+c.n:'Nueva cancha'}</h2><div class="sub">Precios por hora. El horario pico se configura en cada sede.</div>
+    <div class="fields">
+      <label>Nombre<input id="fN" value="${c.n}" placeholder="Ej: Cancha 5"></label>
+      <label>Sede<select id="fS">${misSedes().map(s=>opt(s.id,s.n,c.sede)).join('')}</select></label>
+      <label>Tipo<select id="fT">${['Cristal','Panorámica','Muro'].map(x=>opt(x,x,c.tipo)).join('')}</select></label>
+      <label>Techo<select id="fTe">${['Cubierta','Descubierta'].map(x=>opt(x,x,c.techo)).join('')}</select></label>
+      <label>Superficie<select id="fSu">${['Césped sintético','Cemento','Moqueta'].map(x=>opt(x,x,c.sup)).join('')}</select></label>
+      <label>Estado<select id="fE">${opt('activa','Activa',c.estado)}${opt('mantenimiento','En mantenimiento',c.estado)}</select></label>
+      <label>Precio hora valle ($)<input id="fV" type="number" min="0" step="500" value="${c.valle}"></label>
+      <label>Precio hora pico ($)<input id="fP" type="number" min="0" step="500" value="${c.pico}"></label>
+      <label class="full">Nota interna <input id="fNo" value="${c.nota||''}" placeholder="Ej: cambio de césped hasta el viernes"></label>
+    </div>
+    <div class="m-act"><button class="btn ghost" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarCancha(${id||0})">${ic('check',18)}Guardar</button></div>`);
+}
+function guardarCancha(id){
+  const v = {n:$('#fN').value.trim(), sede:+$('#fS').value, tipo:$('#fT').value, techo:$('#fTe').value, sup:$('#fSu').value,
+             estado:$('#fE').value, valle:+$('#fV').value, pico:+$('#fP').value, nota:$('#fNo').value.trim()};
+  if(v.n.length<2) return toast('Poné un nombre para la cancha', true);
+  if(!(v.valle>0 && v.pico>0)) return toast('Los precios tienen que ser mayores a 0', true);
+  if(id){ const c = cancha(id);
+    if(v.sede!==c.sede && futuras(id).length) return toast(`No se puede mover de sede: tiene ${futuras(id).length} reservas próximas`, true);
+    Object.assign(c,v); toast(`${v.n} actualizada`); }
+  else { CANCHAS.push({id:Math.max(0,...CANCHAS.map(c=>c.id))+1, ...v}); toast(`${v.n} creada en ${sede(v.sede).n}`); }
+  cerrarModal(); renderAll();
+}
+
+/* ---------- Sedes ---------- */
+function renderSedes(){
+  $('#sGrid').innerHTML = misSedes().length ? '' : `<div class="vacio">Todavía no hay sedes. Creá la primera con <b>Nueva sede</b>.</div>`;
+  $('#sGrid').innerHTML += misSedes().map(s=>{ const cs = CANCHAS.filter(c=>c.sede===s.id), act = cs.filter(c=>c.estado==='activa').length;
+    const hoy = RES.filter(r=>r.sede===s.id && r.fecha===TODAY && vigente(r)).length;
+    return `<div class="sede">
+      <div class="sede-hd"><span class="pic">${ic('building-2',24)}</span><div><b>${s.n}</b><small>${ic('map-pin',13)} ${s.dir}</small></div></div>
+      <div class="kv6">
+        <div><small>Horario</small><b>${s.abre} a ${hm(closeMin(s))}</b></div>
+        <div><small>Turno estándar</small><b>${s.turno} min</b></div>
+        <div><small>Horario pico</small><b>desde ${s.pico}</b></div>
+        <div><small>Canchas</small><b>${act} activas de ${cs.length}</b></div>
+        <div><small>Cobro online</small><b>${s.sena===100?'Pago total':'Seña '+s.sena+'%'}</b></div>
+        <div><small>Cancelación sin cargo</small><b>hasta ${s.cancel} h antes</b></div>
+      </div>
+      <div class="tags">${s.servicios.map(x=>`<span>${x}</span>`).join('')}${s.pagoClub?`<span>${ic('store',13)} Acepta pago en el club</span>`:''}</div>
+      <div class="sede-ft"><span>${ic('calendar-days',15)} ${hoy} reservas hoy · ${ic('phone',14)} ${s.tel}</span>
+        <div><button class="btn ghost sm" onclick="ag.sede=${s.id};ag.fecha=TODAY;go('agenda')">${ic('calendar-days',15)}Ver agenda</button>
+          <button class="btn ghost sm" onclick="editSede(${s.id})">${ic('pencil',15)}Editar</button></div></div>
+    </div>`; }).join('');
+}
+function editSede(id){
+  const s = id ? sede(id) : {n:'',dir:'',tel:'',abre:'08:00',cierra:'23:00',turno:90,pico:'18:00',sena:50,cancel:24,pagoClub:true,servicios:['Vestuarios']};
+  modal(`<h2>${ic(id?'pencil':'circle-plus',22)} ${id?'Editar '+s.n:'Nueva sede'}</h2><div class="sub">Estas reglas se aplican a la agenda y a la app de reservas</div>
+    <div class="fields">
+      <label>Nombre<input id="sN" value="${s.n}" placeholder="Ej: Sede Sur"></label>
+      <label>Teléfono<input id="sT" value="${s.tel}" placeholder="11 4000 0000"></label>
+      <label class="full">Dirección<input id="sD" value="${s.dir}" placeholder="Calle, número, localidad"></label>
+      <label>Abre<input id="sA" type="time" step="1800" value="${s.abre}"></label>
+      <label>Cierra<input id="sC" type="time" step="1800" value="${s.cierra}"></label>
+      <label>Duración del turno estándar<select id="sTu">${[60,90].map(d=>opt(d,d+' minutos',s.turno)).join('')}</select></label>
+      <label>Horario pico desde<input id="sP" type="time" step="1800" value="${s.pico}"></label>
+      <label>Cobro online al reservar<select id="sSe">${[30,50,100].map(p=>opt(p,p===100?'Pago total':'Seña del '+p+'%',s.sena)).join('')}</select></label>
+      <label>Cancelación sin cargo hasta<select id="sCa">${[6,12,24,48].map(h=>opt(h,h+' horas antes',s.cancel)).join('')}</select></label>
+      <label class="sw full"><span>Permitir “pagar en el club”<small>La reserva queda pendiente de pago, sin cobro online</small></span><input type="checkbox" id="sPc" ${s.pagoClub?'checked':''}></label>
+      <label class="full">Servicios<div class="chk">${SERVICIOS.map(x=>`<label><input type="checkbox" value="${x}" ${s.servicios.includes(x)?'checked':''}><span>${x}</span></label>`).join('')}</div></label>
+    </div>
+    <div class="m-act"><button class="btn ghost" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarSede(${id||0})">${ic('check',18)}Guardar</button></div>`);
+}
+function guardarSede(id){
+  const v = {n:$('#sN').value.trim(), tel:$('#sT').value.trim(), dir:$('#sD').value.trim(), abre:$('#sA').value, cierra:$('#sC').value,
+    turno:+$('#sTu').value, pico:$('#sP').value, sena:+$('#sSe').value, cancel:+$('#sCa').value, pagoClub:$('#sPc').checked,
+    servicios:[...document.querySelectorAll('.chk input:checked')].map(x=>x.value)};
+  if(v.n.length<2 || v.dir.length<4) return toast('Completá nombre y dirección', true);
+  if(!v.abre || !v.cierra || !v.pico) return toast('Completá los horarios', true);
+  if([v.abre,v.cierra,v.pico].some(t=>toMin(t)%30)) return toast('Los horarios tienen que ser en punto o y media', true);
+  if(closeMin(v)-toMin(v.abre) < 120) return toast('La sede tiene que abrir al menos 2 horas', true);
+  if(id){ Object.assign(sede(id),v); toast(`${v.n} actualizada`); }
+  else { const n = {id:Math.max(0,...SEDES.map(s=>s.id))+1, club:ses.club, ...v}; SEDES.push(n); toast(`${v.n} creada · ahora agregale canchas`); }
+  cerrarModal(); renderAll();
+}
+
+/* ---------- App del jugador ---------- */
+const app = {club:'padelpoint', step:'inicio', sede:null, fecha:TODAY, dur:90, hora:null, cancha:null, datos:null, draft:null, pago:null, ult:null, mias:[], err:{}, busy:false};
+function appGo(st){ app.step = st; app.err = {}; renderApp(); $('#phone .scr').scrollTop = 0; }
+function appReset(){ Object.assign(app,{club:ses.rol==='admin'?ses.club:app.club,step:'inicio',sede:null,fecha:TODAY,hora:null,cancha:null,datos:null,draft:null,pago:null,ult:null,mias:[],err:{},busy:false}); renderApp(); }
+const disp = (sid,f,ini,dur) => pasado(f,ini) ? [] : CANCHAS.filter(c=>c.sede===sid && c.estado==='activa' && libre(c.id,f,ini,dur));
+const horasHasta = r => (kDate(r.fecha).getTime() + r.ini*60000 - Date.now()) / 3600000;
+const aHead = (t, back) => `<div class="c-head">${back?`<button class="c-ib" onclick="appGo('${back}')" aria-label="Volver">${ic('arrow-left',20)}</button>`:'<span class="c-ib ghost"></span>'}
+  <div><b>${t}</b><small>${app.sede?sede(app.sede).n:club(app.club).n}</small></div>
+  <button class="c-ib" onclick="appGo('mis')" aria-label="Mis reservas">${ic('ticket',18)}</button></div>`;
+const resumen = o => { const c = cancha(o.cancha), s = sede(c.sede); return `<div class="c-sum">
+  <div><span>Sede</span><b>${s.n}</b></div><div><span>Cancha</span><b>${c.n} · ${c.tipo}, ${c.techo.toLowerCase()}</b></div>
+  <div><span>Día</span><b>${dLabel(o.fecha,{weekday:'long',day:'numeric',month:'long'})}</b></div>
+  <div><span>Horario</span><b>${hm(o.ini)} a ${hm(o.ini+o.dur)} (${o.dur} min)</b></div>
+  <div class="big"><span>Total</span><b>${money(precio(c,o.ini,o.dur))}</b></div></div>`; };
+const sel = () => ({cancha:app.cancha, fecha:app.fecha, ini:app.hora, dur:app.dur});
+
+function renderApp(){
+  const el = $('#phone .scr'); if(!el) return;
+  const E = k => app.err[k] ? `<div class="c-err">${app.err[k]}</div>` : '';
+  let h = '';
+  const cl = club(app.club), sedesClub = SEDES.filter(x=>x.club===app.club);
+  const misApp = app.mias.map(id=>RES.find(r=>r.id===id)).filter(r=>sede(r.sede).club===app.club);
+  if(!cl.activo){
+    h = `<div class="c-closed">${ic('info',38)}<b>Este sitio no está disponible</b><span>Las reservas online de ${cl.n} están pausadas. Comunicate con el club.</span></div>`;
+  }
+  else if(app.step==='inicio'){
+    h = `<div class="c-hero"><span class="c-logo">${ic('racket',32)}</span><h2>${cl.n}</h2><p>Reservá tu cancha: elegí sede, día y horario. Confirmás en menos de un minuto.</p></div>
+      <div class="c-list">${sedesClub.length?'':`<div class="c-empty">${ic('calendar-days',34)}<span>El club todavía no publicó sus sedes.</span></div>`}${sedesClub.map(s=>{ const cs = CANCHAS.filter(c=>c.sede===s.id && c.estado==='activa');
+        return `<button class="c-sede" ${cs.length?'':'disabled style="opacity:.5"'} onclick="app.sede=${s.id};app.dur=${s.turno};app.fecha=TODAY;app.hora=null;app.cancha=null;appGo('turno')">
+          <div class="c-row"><b>${s.n}</b>${ic('chevron-right',18)}</div>
+          <small>${ic('map-pin',13)} ${s.dir}</small>
+          <div class="c-meta"><span>${cs.length} canchas</span>${cs.length?`<span>desde ${money(Math.min(...cs.map(c=>c.valle)))}/h</span>`:''}<span>${s.abre} a ${hm(closeMin(s))}</span></div>
+          <div class="c-tags">${s.servicios.map(x=>`<span>${x}</span>`).join('')}</div></button>`; }).join('')}</div>
+      <div class="c-foot"><button class="c-btn ghost" onclick="appGo('mis')">${ic('ticket',18)} Mis reservas ${misApp.length?`<span>${misApp.length}</span>`:''}</button></div>`;
+  }
+  else if(app.step==='turno'){
+    const s = sede(app.sede), a = toMin(s.abre), e = closeMin(s);
+    const slots = []; for(let m=a; m+app.dur<=e; m+=30) slots.push({m, n:disp(s.id,app.fecha,m,app.dur).length});
+    const libres = slots.filter(x=>x.n).length;
+    h = aHead('Elegí tu turno','inicio') + `<div class="c-sec">
+      <div class="c-lbl">Día</div>
+      <div class="c-days">${[...Array(8)].map((_,i)=>{ const d = addD(TODAY,i);
+        return `<button class="${d===app.fecha?'on':''}" onclick="app.fecha='${d}';app.hora=null;app.cancha=null;renderApp()"><small>${i===0?'Hoy':kDate(d).toLocaleDateString('es-AR',{weekday:'short'}).replace('.','')}</small><b>${kDate(d).getDate()}</b></button>`; }).join('')}</div>
+      <div class="c-lbl">Duración</div>
+      <div class="c-seg">${[60,90,120].map(d=>`<button class="${d===app.dur?'on':''}" onclick="app.dur=${d};app.hora=null;app.cancha=null;renderApp()">${d} min</button>`).join('')}</div>
+      <div class="c-lbl">Horario <em>${libres} disponibles</em></div>
+      ${libres ? `<div class="c-slots">${slots.map(x=>`<button class="${x.m===app.hora?'on':''}" ${x.n?'':'disabled'} onclick="app.hora=${x.m};app.cancha=null;renderApp()">${hm(x.m)}</button>`).join('')}</div>`
+               : `<div class="c-empty" style="padding:24px 0">${ic('calendar-days',30)}No quedan turnos este día. Probá otro día o duración.</div>`}
+      ${app.hora!=null ? `<div class="c-lbl">Canchas libres a las ${hm(app.hora)}</div>
+        ${disp(s.id,app.fecha,app.hora,app.dur).map(c=>`<button class="c-court ${c.id===app.cancha?'on':''}" onclick="app.cancha=${c.id};renderApp()">
+          <span class="c-ic">${ic(c.techo==='Cubierta'?'house':'sun',20)}</span>
+          <span class="c-tx"><b>${c.n}</b><small>${c.tipo} · ${c.techo} · ${c.sup}</small></span>
+          <span class="c-pr">${money(precio(c,app.hora,app.dur))}</span></button>`).join('')}` : ''}
+    </div>
+    <div class="c-foot"><button class="c-btn" ${app.cancha?'':'disabled'} onclick="appGo('datos')">Continuar ${app.cancha?`<span>${money(precio(cancha(app.cancha),app.hora,app.dur))}</span>`:''}</button></div>`;
+  }
+  else if(app.step==='datos'){
+    const s = sede(app.sede), D = app.draft || app.datos || {};
+    h = aHead('Tus datos','turno') + `<div class="c-form">${resumen(sel())}
+      <label>Nombre y apellido<div class="c-in ${app.err.nom?'bad':''}">${ic('user',18)}<input id="aNom" value="${D.nom||''}" placeholder="A nombre de quién va la reserva" autocomplete="name"></div>${E('nom')}</label>
+      <label>Celular<div class="c-in ${app.err.tel?'bad':''}">${ic('phone',18)}<input id="aTel" value="${D.tel||''}" inputmode="tel" placeholder="11 5555 5555" autocomplete="tel"></div>${E('tel')}</label>
+      <label>Email <em>(opcional, para el comprobante)</em><div class="c-in ${app.err.mail?'bad':''}">${ic('mail',18)}<input id="aMail" value="${D.mail||''}" inputmode="email" placeholder="tu@email.com" autocomplete="email"></div>${E('mail')}</label>
+      <label class="c-ok"><input type="checkbox" id="aOk" ${D.ok?'checked':''}><span>Acepto la política de la sede: cancelación sin cargo hasta <b>${s.cancel} h antes</b> del turno.</span></label>${E('ok')}
+    </div>
+    <div class="c-foot"><button class="c-btn" onclick="appDatos()">Ir al pago ${ic('chevron-right',18)}</button></div>`;
+  }
+  else if(app.step==='pago'){
+    const s = sede(app.sede), total = precio(cancha(app.cancha),app.hora,app.dur), sena = Math.round(total*s.sena/100/100)*100;
+    const ops = [];
+    if(s.sena<100) ops.push({k:'senada', t:`Seña del ${s.sena}%`, d:`Pagás ${money(sena)} ahora y ${money(total-sena)} en el club`, m:sena, i:'wallet'});
+    ops.push({k:'pagada', t:'Pago total', d:'Mercado Pago, tarjeta o transferencia', m:total, i:'credit-card'});
+    if(s.pagoClub) ops.push({k:'pendiente', t:'Pagar en el club', d:'Queda reservado; llegá 15 min antes para abonar', m:0, i:'store'});
+    if(!ops.some(o=>o.k===app.pago)) app.pago = ops[0].k;
+    const op = ops.find(o=>o.k===app.pago);
+    h = aHead('Pago','datos') + `<div class="c-form">${resumen(sel())}
+      <div class="c-lbl">¿Cómo querés pagar?</div>
+      ${ops.map(o=>`<button class="c-pay ${o.k===app.pago?'on':''}" onclick="app.pago='${o.k}';renderApp()"><span class="c-ic">${ic(o.i,20)}</span>
+        <span class="c-tx"><b>${o.t}</b><small>${o.d}</small></span><span class="rad"></span></button>`).join('')}
+      <div class="c-safe">${ic('shield-check',16)} Pago seguro. No guardamos los datos de tu tarjeta.</div>
+    </div>
+    <div class="c-foot"><button class="c-btn" ${app.busy?'disabled':''} onclick="appPagar()">${app.busy?'Procesando pago…':op.m?`${ic('credit-card',18)} Pagar ${money(op.m)}`:`${ic('check',18)} Confirmar reserva`}</button></div>`;
+  }
+  else if(app.step==='ok'){
+    const r = RES.find(x=>x.id===app.ult);
+    h = aHead('Reserva confirmada') + `<div class="c-done">${ic('circle-check-big',34)}<div><b>¡Listo, ${r.cliente.split(' ')[0]}! Tenés cancha.</b>
+        <small>${r.estado==='pendiente'?'Abonás en el club al llegar.':`Pagaste ${money(pagado(r))}. Te mandamos el comprobante por WhatsApp.`}</small></div></div>
+      <div class="c-form"><div class="c-code"><small>Código de reserva</small><b>${r.code}</b></div>
+        ${resumen({cancha:r.cancha,fecha:r.fecha,ini:r.ini,dur:r.dur})}
+        ${r.estado!=='pagada'?`<div class="c-safe">${ic('info',16)} Saldo a pagar en el club: <b style="color:var(--text)">${money(r.monto-pagado(r))}</b></div>`:''}
+      </div>
+      <div class="c-foot">
+        <button class="c-btn ghost" onclick="toast('Se agregaría el turno al calendario del celular')">${ic('calendar-plus',18)} Agregar al calendario</button>
+        <button class="c-btn ghost" onclick="toast('Se abriría WhatsApp para avisarle a tus compañeros')">${ic('share-2',18)} Avisar a mis compañeros</button>
+        <button class="c-btn" onclick="appGo('inicio')">Volver al inicio</button></div>`;
+  }
+  else if(app.step==='mis'){
+    const l = misApp;
+    h = aHead('Mis reservas','inicio') + `<div class="c-list">${l.length ? l.map(r=>{ const c = cancha(r.cancha), s = sede(r.sede), puede = vigente(r) && horasHasta(r) > s.cancel;
+      return `<div class="c-res ${r.estado}">
+        <div class="c-row"><b>${dShort(r.fecha)} · ${hm(r.ini)}</b><span class="pill ${r.estado}">${ESTADO[r.estado]}</span></div>
+        <small>${s.n} · ${c.n} · ${r.dur} min</small>
+        <div class="c-row"><small>${r.code}</small><b>${money(r.monto)}</b></div>
+        ${vigente(r) ? (puede ? `<button class="c-cancel" onclick="appCancelar(${r.id})">${ic('x',15)} Cancelar sin cargo</button>`
+          : `<div class="c-note">${ic('info',14)} Faltan menos de ${s.cancel} h: ya no se puede cancelar online</div>`) : ''}
+      </div>`; }).join('') : `<div class="c-empty">${ic('ticket',38)}<span>Todavía no tenés reservas.</span></div>`}</div>
+      <div class="c-foot"><button class="c-btn" onclick="appGo('inicio')">${ic('plus',18)} Nueva reserva</button></div>`;
+  }
+  el.innerHTML = h;
+}
+function appDatos(){
+  const v = id => $('#'+id).value.trim();
+  const d = {nom:v('aNom'), tel:v('aTel'), mail:v('aMail'), ok:$('#aOk').checked};
+  app.err = {};
+  if(d.nom.length<3) app.err.nom = 'Ingresá tu nombre y apellido';
+  if(!PHONE_RE.test(d.tel)) app.err.tel = 'Ingresá un celular válido (mín. 8 dígitos)';
+  if(d.mail && !/^\S+@\S+\.\S+$/.test(d.mail)) app.err.mail = 'El email no parece válido';
+  if(!d.ok) app.err.ok = 'Necesitamos que aceptes la política de cancelación';
+  if(Object.keys(app.err).length){ app.draft = d; return renderApp(); }
+  app.datos = d; app.draft = null; appGo('pago');
+}
+function appPagar(){
+  app.busy = true; renderApp();
+  setTimeout(()=>{
+    app.busy = false;
+    if(!libre(app.cancha,app.fecha,app.hora,app.dur) || pasado(app.fecha,app.hora)){
+      app.hora = null; app.cancha = null; toast('Ese turno se acaba de ocupar. Elegí otro horario.', true); return appGo('turno');
+    }
+    const r = crear({cid:app.cancha, f:app.fecha, ini:app.hora, dur:app.dur, cliente:app.datos.nom, tel:app.datos.tel, estado:app.pago, origen:'app'});
+    app.ult = r.id; app.mias.unshift(r.id); app.step = 'ok';
+    renderAll(); $('#phone .scr').scrollTop = 0;
+    toast(`Nueva reserva desde la app · ${sede(r.sede).n}, ${cancha(r.cancha).n} ${hm(r.ini)}`);
+  }, 900);
+}
+function appCancelar(id){
+  const r = RES.find(x=>x.id===id), pg = pagado(r); r.estado = 'cancelada'; renderAll();
+  toast(`Reserva ${r.code} cancelada${pg?` · te devolvemos ${money(pg)}`:''}`);
+}
+
+/* ---------- Sesión (demo) ---------- */
+function cambiarSesion(v){
+  if(v==='owner'){ ses.rol = 'owner'; ses.club = null; }
+  else { ses.rol = 'admin'; ses.club = v.split(':')[1]; app.club = ses.club; }
+  ag.sede = 0; rf.sede = 0; cf.sede = 0; appReset(); cerrarModal();
+  go(ses.rol==='owner' ? 'clientes' : 'agenda');
+  toast(ses.rol==='owner' ? 'Entraste como dueño de la plataforma' : `Entraste como admin de ${club(ses.club).n}: solo ves sus datos`);
+}
+function renderSesion(){
+  document.querySelectorAll('[data-rol]').forEach(e=>e.style.display = e.dataset.rol.split(' ').includes(ses.rol) ? '' : 'none');
+  $('#verComo').innerHTML = CLUBES.map(c=>opt('admin:'+c.id,'Admin de '+c.n, ses.rol==='admin'?'admin:'+ses.club:'')).join('') + opt('owner','Dueño de la plataforma', ses.rol);
+  const cl = ses.club && club(ses.club);
+  $('#brandN').textContent = cl ? cl.n : 'Padel Club';
+  $('#brandS').textContent = cl ? 'Gestión de turnos' : 'Plataforma';
+  const nom = cl ? cl.admin : 'Vos';
+  $('#uName').textContent = nom; $('#uAv').textContent = cl ? nom.split(' ').map(x=>x[0]).join('').slice(0,2) : 'PC';
+  $('#uRol').textContent = cl ? 'Admin · '+cl.n : 'Dueño de la plataforma';
+  $('#banner').innerHTML = cl && !cl.activo ? `<div class="banner bad">${ic('info',18)}<span>Tu sitio de reservas está <b>pausado</b>. Los jugadores no pueden reservar online. Comunicate con Padel Club.</span></div>`
+    : cl && cl.pago==='vencido' ? `<div class="banner">${ic('wallet',18)}<span>Tenés pendiente el abono de este mes (${money(cl.abono)}). Regularizalo para no interrumpir las reservas online.</span></div>` : '';
+  if(ses.rol==='admin') app.club = ses.club;
+  $('#appLink').innerHTML = `<span class="c-logo">${ic('racket',30)}</span><div style="min-width:0;flex:1"><b>padelclub.app/reservas/<span class="slug">${app.club}</span></b>
+      <small>${ses.rol==='owner'?'Elegí qué club previsualizar':'Tu link para Instagram, WhatsApp y Google Maps'}</small>
+      ${ses.rol==='owner'?`<select class="inp" style="margin-top:8px" onchange="app.club=this.value;appReset();renderSesion()">${CLUBES.map(c=>opt(c.id,c.n+' · /reservas/'+c.id,app.club)).join('')}</select>`:''}</div>
+    ${ses.rol==='admin'?`<button class="btn ghost sm" onclick="toast('Link copiado: padelclub.app/reservas/${app.club}')">Copiar</button>`:''}`;
+}
+const mesActual = TODAY.slice(0,7);
+function renderClientes(){
+  const act = CLUBES.filter(c=>c.activo);
+  $('#clKpis').innerHTML = `
+    <div class="kpi l">${ic('building-2',26)}<div>Clubes activos<b>${act.length} de ${CLUBES.length}</b></div></div>
+    <div class="kpi g">${ic('coins',26)}<div>Abonos del mes<b>${money(act.reduce((x,c)=>x+c.abono,0))}</b></div></div>
+    <div class="kpi">${ic('circle-check',26)}<div>Cobrado<b>${money(act.filter(c=>c.pago==='al día').reduce((x,c)=>x+c.abono,0))}</b></div></div>
+    <div class="kpi a">${ic('wallet',26)}<div>Abonos vencidos<b>${CLUBES.filter(c=>c.pago==='vencido').length}</b></div></div>`;
+  $('#clBody').innerHTML = CLUBES.map(c=>{ const ss = SEDES.filter(x=>x.club===c.id), cs = CANCHAS.filter(x=>ss.some(y=>y.id===x.sede));
+    const usos = RES.filter(r=>vigente(r) && r.fecha.startsWith(mesActual) && sede(r.sede).club===c.id).length;
+    return `<tr class="${c.activo?'':'off'}">
+      <td><b>${c.n}</b><small>${c.admin} · ${c.mail}</small></td>
+      <td><span class="clink">/reservas/${c.id}</span><small>cliente desde ${dShort(c.desde)}</small></td>
+      <td>${ss.length} ${ss.length===1?'sede':'sedes'} · ${cs.length} ${cs.length===1?'cancha':'canchas'}</td>
+      <td class="num">${usos}</td>
+      <td class="num">${money(c.abono)}<small>por mes</small></td>
+      <td>${c.pago==='al día'?'<span class="pill">Al día</span>':'<span class="pill cancelada">Vencido</span>'}</td>
+      <td><label class="sw" style="background:none;border:none;padding:0" title="${c.activo?'Pausar':'Activar'} reservas online"><input type="checkbox" ${c.activo?'checked':''} onchange="toggleClub('${c.id}')"></label></td>
+      <td><div style="display:flex;gap:6px;justify-content:flex-end">
+        ${c.pago==='vencido'?`<button class="btn ghost sm" onclick="registrarAbono('${c.id}')">${ic('banknote',15)}Registrar pago</button>`:''}
+        <button class="btn ghost sm" onclick="app.club='${c.id}';appReset();go('app')">${ic('smartphone',15)}Ver sitio</button></div></td>
+    </tr>`; }).join('');
+  const venc = CLUBES.filter(c=>c.pago==='vencido').length;
+  $('#bCli').textContent = venc; $('#bCli').style.visibility = venc ? '' : 'hidden';
+}
+function toggleClub(id){ const c = club(id); c.activo = !c.activo; renderAll(); toast(`${c.n}: reservas online ${c.activo?'activadas':'pausadas'}`, !c.activo); }
+function registrarAbono(id){ const c = club(id); c.pago = 'al día'; renderAll(); toast(`Abono de ${c.n} registrado · ${money(c.abono)}`); }
+const slugify = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,30);
+function nuevoCliente(){
+  modal(`<h2>${ic('circle-plus',22)} Nuevo cliente</h2><div class="sub">El club recibe su propio link y un acceso de administrador que solo ve sus datos</div>
+    <div class="fields">
+      <label>Nombre del club<input id="kN" placeholder="Ej: Padel Sur" oninput="if(!kS.dataset.tocado){kS.value=slugify(this.value)}"></label>
+      <label>Link de reservas<input id="kS" placeholder="padelsur" oninput="this.dataset.tocado=1;this.value=slugify(this.value)"></label>
+      <label>Nombre del administrador<input id="kA" placeholder="Ej: Juan Pérez"></label>
+      <label>Email del administrador<input id="kM" placeholder="admin@club.com"></label>
+      <label>Abono mensual ($)<input id="kP" type="number" min="0" step="1000" value="35000"></label>
+    </div>
+    <div class="m-tot"><span class="muted" id="kPrev" style="color:var(--muted)">El link queda: padelclub.app/reservas/…</span></div>
+    <div class="m-act"><button class="btn ghost" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarCliente()">${ic('check',18)}Crear cliente</button></div>`);
+  const upd = () => $('#kPrev').textContent = 'El link queda: padelclub.app/reservas/' + ($('#kS').value || '…');
+  $('#kN').addEventListener('input', upd); $('#kS').addEventListener('input', upd);
+}
+function guardarCliente(){
+  const n = $('#kN').value.trim(), id = $('#kS').value, a = $('#kA').value.trim(), m = $('#kM').value.trim(), p = +$('#kP').value;
+  if(n.length<2) return toast('Ingresá el nombre del club', true);
+  if(id.length<3) return toast('El link tiene que tener al menos 3 letras', true);
+  if(club(id)) return toast(`El link /reservas/${id} ya lo usa otro club`, true);
+  if(a.length<2 || !/^\S+@\S+\.\S+$/.test(m)) return toast('Completá nombre y email del administrador', true);
+  if(!(p>0)) return toast('El abono tiene que ser mayor a 0', true);
+  CLUBES.push({id, n, pref:n.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase()||'CL', admin:a, mail:m, abono:p, desde:TODAY, pago:'al día', activo:true});
+  cerrarModal(); renderAll(); toast(`${n} creado · padelclub.app/reservas/${id}`);
+}
+
+/* ---------- General ---------- */
+let tt;
+function toast(msg, err){
+  const el = $('#toast'); el.textContent = msg; el.style.background = err ? 'var(--red)' : 'var(--green)'; el.style.color = '#fff';
+  el.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+function renderAll(){
+  renderSesion();
+  if(ses.rol==='owner') renderClientes();
+  else { renderAgenda(); renderReservas(); renderCanchas(); renderSedes(); }
+  if(app.step!=='datos') renderApp();   // no pisar lo que el jugador está tipeando
+  const pend = ses.rol==='admin' ? RES.filter(r=>esMia(r) && r.estado==='pendiente' && r.fecha>=TODAY).length : 0;
+  $('#bRes').textContent = pend; $('#bRes').style.visibility = pend ? '' : 'hidden';
+}
+renderAll();
+setInterval(()=>{ if(ses.rol==='admin') renderAgenda(); }, 60000);
+</script>
+</body>
+</html>
